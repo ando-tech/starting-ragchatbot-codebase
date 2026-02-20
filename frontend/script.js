@@ -28,8 +28,11 @@ function setupEventListeners() {
     chatInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') sendMessage();
     });
-    
-    
+
+    // New Chat Button
+    const newChatBtn = document.getElementById('newChatBtn');
+    newChatBtn.addEventListener('click', createNewSession);
+
     // Suggested questions
     document.querySelectorAll('.suggested-item').forEach(button => {
         button.addEventListener('click', (e) => {
@@ -115,25 +118,67 @@ function addMessage(content, type, sources = null, isWelcome = false) {
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${type}${isWelcome ? ' welcome-message' : ''}`;
     messageDiv.id = `message-${messageId}`;
-    
+
     // Convert markdown to HTML for assistant messages
     const displayContent = type === 'assistant' ? marked.parse(content) : escapeHtml(content);
-    
+
     let html = `<div class="message-content">${displayContent}</div>`;
-    
+
     if (sources && sources.length > 0) {
+        // Deduplicate sources based on title and lesson_number
+        const uniqueSources = [];
+        const seen = new Set();
+
+        for (const source of sources) {
+            const sourceObj = typeof source === 'string' ? { title: source, url: null } : source;
+            const key = `${sourceObj.title}|${sourceObj.lesson_number}`;
+
+            if (!seen.has(key)) {
+                seen.add(key);
+                uniqueSources.push(sourceObj);
+            }
+        }
+
+        // Map source objects to clickable pill-style links
+        const sourceLinks = uniqueSources.map(source => {
+            // Handle both object sources and legacy string sources
+            const sourceObj = typeof source === 'string' ? { title: source, url: null } : source;
+
+            // Build display parts
+            const courseTitle = escapeHtml(sourceObj.title);
+            const lessonText = sourceObj.lesson_number !== null && sourceObj.lesson_number !== undefined
+                ? `Lesson ${sourceObj.lesson_number}`
+                : '';
+
+            // Create link if URL exists, otherwise plain text
+            if (sourceObj.url) {
+                return `
+                    <a href="${escapeHtml(sourceObj.url)}" target="_blank" rel="noopener noreferrer" class="source-pill">
+                        <span class="source-course">${courseTitle}</span>
+                        ${lessonText ? `<span class="source-lesson">${lessonText}</span>` : ''}
+                    </a>
+                `;
+            }
+            return `
+                <span class="source-pill source-pill-disabled">
+                    <span class="source-course">${courseTitle}</span>
+                    ${lessonText ? `<span class="source-lesson">${lessonText}</span>` : ''}
+                </span>
+            `;
+        }).join('');
+
         html += `
             <details class="sources-collapsible">
-                <summary class="sources-header">Sources</summary>
-                <div class="sources-content">${sources.join(', ')}</div>
+                <summary class="sources-header">📚 Sources</summary>
+                <div class="sources-content">${sourceLinks}</div>
             </details>
         `;
     }
-    
+
     messageDiv.innerHTML = html;
     chatMessages.appendChild(messageDiv);
     chatMessages.scrollTop = chatMessages.scrollHeight;
-    
+
     return messageId;
 }
 
