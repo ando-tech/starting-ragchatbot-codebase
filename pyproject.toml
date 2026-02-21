@@ -14,7 +14,16 @@ dependencies = [
     "python-dotenv==1.1.1",
 ]
 
+[tool.pytest.ini_options]
+testpaths = ["backend/tests"]
+pythonpath = ["backend"]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::ResourceWarning",
+]
+
 [dependency-groups]
 dev = [
     "pytest>=9.0.2",
+    "httpx>=0.28.0",
 ]
