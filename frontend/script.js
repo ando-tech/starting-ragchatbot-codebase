@@ -4,6 +4,21 @@ const API_URL = '/api';
 // Global state
 let currentSessionId = null;
 
+// Theme management
+function initTheme() {
+    const saved = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const theme = saved || (prefersDark ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', theme);
+}
+
+function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme');
+    const next = current === 'light' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+}
+
 // DOM elements
 let chatMessages, chatInput, sendButton, totalCourses, courseTitles;
 
@@ -16,6 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     totalCourses = document.getElementById('totalCourses');
     courseTitles = document.getElementById('courseTitles');
     
+    initTheme();
     setupEventListeners();
     createNewSession();
     loadCourseStats();
@@ -32,6 +48,10 @@ function setupEventListeners() {
     // New Chat Button
     const newChatBtn = document.getElementById('newChatBtn');
     newChatBtn.addEventListener('click', createNewSession);
+
+    // Theme toggle
+    const themeToggle = document.getElementById('themeToggle');
+    themeToggle.addEventListener('click', toggleTheme);
 
     // Suggested questions
     document.querySelectorAll('.suggested-item').forEach(button => {
