@@ -85,7 +85,20 @@ body {
 
 /* Header - Hidden */
 header {
-    display: none;
+    display: block;
+    padding: 12px 20px;
+    text-align: center;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.new-year-banner {
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #f59e0b 0%, #ef4444 50%, #a855f7 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 4px;
 }
 
 header h1 {
